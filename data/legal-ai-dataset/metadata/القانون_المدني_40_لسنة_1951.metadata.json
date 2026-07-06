@@ -1,0 +1,45 @@
+[
+  {
+    "id": "chunk_e6ac05af32834f17",
+    "book_name": "القانون المدني 40 لسنة 1951",
+    "chapter": "الباب التمهيدي",
+    "section": "",
+    "article_number": "1, 2, 34, 35, 36",
+    "page_number": "1",
+    "language": "ar",
+    "summary": "مقتطف من المادة 1, 2, 34, 35, 36: القانون المدني العراقي رقم 40 لسنة 1951 المادة 1 1 – تسري النصوص التشريعية على جميع المسائل التي تتناولها هذه النصوص في لفظها او في فحواها.",
+    "keywords": [
+      "محكمة",
+      "إثبات",
+      "حقوق",
+      "دليل",
+      "مدني",
+      "حكم",
+      "فاذا",
+      "يوجد",
+      "النصوص",
+      "فبمقتضى",
+      "بالسجلات",
+      "الاثبات",
+      "المدني",
+      "العراقي",
+      "لسنة",
+      "تسري"
+    ],
+    "legal_topics": [
+      "evidence",
+      "procedural law",
+      "civil law",
+      "constitutional law"
+    ],
+    "source_file": "القانون المدني 40 لسنة 1951.txt",
+    "token_count": 165,
+    "chunk_index": 0,
+    "previous_chunk_id": "",
+    "next_chunk_id": "",
+    "page_start": 1,
+    "page_end": 1,
+    "extraction_method": "text",
+    "ocr_confidence": null
+  }
+]

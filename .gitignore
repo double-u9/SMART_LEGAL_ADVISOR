@@ -1,0 +1,22 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Local databases and models (HUGE FILES)
+vector_store/
+vectors_cache.pkl
+.models_cache/
+.ollama_cache/
+
+# OS
+.DS_Store
+Thumbs.db
