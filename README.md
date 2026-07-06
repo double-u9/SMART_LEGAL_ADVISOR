@@ -1,3 +1,4 @@
+
 # 🏛️ المستشار القانوني الذكي — Smart Legal Advisor
 
 Enterprise-grade AI legal assistant for Iraqi law. Powered by **local Ollama** — no cloud APIs, no costs.
