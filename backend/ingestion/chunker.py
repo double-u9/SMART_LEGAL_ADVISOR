@@ -6,14 +6,15 @@ import hashlib
 import re
 from dataclasses import dataclass, field
 from typing import Optional
-from backend.utils.arabic_utils import extract_article_number, extract_chapter
+from backend.utils.arabic_utils import extract_article_number, extract_chapter, eastern_to_western
 from backend.utils.logging_config import get_logger
 
 logger = get_logger("chunker")
 
-# Legal article boundary patterns
+# Legal article boundary patterns — match both Western (123) and Eastern Arabic (١٢٣) numerals
+_ARABIC_NUMERAL = r"(?:[\d٠-٩]+)"
 _ARTICLE_PATTERN = re.compile(
-    r"(?:^|\n)\s*(?:المادة|مادة)\s*[:\-\(]?\s*\d+", re.MULTILINE
+    r"(?:^|\n)\s*(?:المادة|مادة)\s*[:\-\(]?\s*" + _ARABIC_NUMERAL, re.MULTILINE
 )
 _CHAPTER_PATTERN = re.compile(
     r"(?:^|\n)\s*(?:الباب|الفصل|القسم)\s+", re.MULTILINE
@@ -62,7 +63,7 @@ class LegalChunker:
 
     def __init__(
         self,
-        min_tokens: int = 500,
+        min_tokens: int = 50,
         max_tokens: int = 1200,
         overlap_tokens: int = 150,
         hard_max: int = 1500,

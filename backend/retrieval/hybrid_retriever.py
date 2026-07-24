@@ -101,10 +101,15 @@ class HybridRetriever:
         # Sort by combined score
         sorted_ids = sorted(doc_scores.keys(), key=lambda x: doc_scores[x], reverse=True)
 
+        # Normalize scores to 0-1 range for frontend display
+        # The theoretical maximum score is achieved if a document is rank 1 in both lists (rank=0)
+        max_possible_score = (self.semantic_weight + self.bm25_weight) / (self.rrf_k + 1)
+
         results = []
         for doc_id in sorted_ids[:top_k]:
             entry = doc_data[doc_id].copy()
-            entry["hybrid_score"] = round(doc_scores[doc_id], 6)
+            normalized_score = min(1.0, doc_scores[doc_id] / max_possible_score)
+            entry["hybrid_score"] = round(normalized_score, 4)
             results.append(entry)
 
         return results

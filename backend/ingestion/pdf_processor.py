@@ -68,7 +68,36 @@ class PDFProcessor:
         pages = []
         with fitz.open(str(pdf_path)) as doc:
             for i, page in enumerate(doc):
-                text = page.get_text("text")
+                # Use word-level extraction with RTL-aware sorting.
+                # Arabic PDFs store text in visual order, so we must sort
+                # words by position: top-to-bottom, then right-to-left.
+                words = page.get_text("words")  # (x0,y0,x1,y1,word,block,line,word_idx)
+
+                # Sort by line (y rounded to 8px grid), then RTL within line
+                words.sort(key=lambda w: (round(w[1] / 8) * 8, -w[0]))
+
+                # Group words into lines
+                lines = []
+                current_line: list = []
+                current_y: float | None = None
+
+                for w in words:
+                    y_key = round(w[1] / 8) * 8
+                    if current_y is None or abs(y_key - current_y) > 4:
+                        if current_line:
+                            # Within a line sort RTL
+                            current_line.sort(key=lambda wd: -wd[0])
+                            lines.append(" ".join(wd[4] for wd in current_line))
+                        current_line = [w]
+                        current_y = y_key
+                    else:
+                        current_line.append(w)
+
+                if current_line:
+                    current_line.sort(key=lambda wd: -wd[0])
+                    lines.append(" ".join(wd[4] for wd in current_line))
+
+                text = "\n".join(lines)
                 pages.append({
                     "page_number": i + 1,
                     "text": text.strip(),

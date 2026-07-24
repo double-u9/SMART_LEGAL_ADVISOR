@@ -28,8 +28,8 @@ class ResponseGenerator:
     def _build_prompt(self, question: str, context: str) -> tuple[str, str]:
         """Build system prompt and user prompt."""
         system = SYSTEM_PROMPT
-        user_prompt = CONTEXT_TEMPLATE.format(context=context)
-        user_prompt += "\n\n" + QUERY_TEMPLATE.format(question=question)
+        # CONTEXT_TEMPLATE now includes {question} inline for cleaner flow
+        user_prompt = CONTEXT_TEMPLATE.format(context=context, question=question)
         return system, user_prompt
 
     async def generate(self, question: str, context: str) -> str:
@@ -51,9 +51,10 @@ class ResponseGenerator:
                         ],
                         "stream": False,
                         "options": {
-                            "temperature": 0.1,
+                            "temperature": 0.2,
                             "top_p": 0.9,
                             "num_predict": 2048,
+                            "repeat_penalty": 1.1,
                         },
                     },
                 )
@@ -89,9 +90,10 @@ class ResponseGenerator:
                         ],
                         "stream": True,
                         "options": {
-                            "temperature": 0.1,
+                            "temperature": 0.2,
                             "top_p": 0.9,
                             "num_predict": 2048,
+                            "repeat_penalty": 1.1,
                         },
                     },
                 ) as response:

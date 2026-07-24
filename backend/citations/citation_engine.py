@@ -69,7 +69,7 @@ class CitationEngine:
         logger.info("Extracted %d unique citations from %d chunks", len(citations), len(chunks))
         return citations
 
-    def _extract_relevant_text(self, payload: dict, max_chars: int = 800) -> str:
+    def _extract_relevant_text(self, payload: dict) -> str:
         """Extract the most relevant text excerpt for citation display.
 
         Priority order:
@@ -87,19 +87,7 @@ class CitationEngine:
             return ""
 
         # Clean up the text for display
-        text = text.strip()
-
-        if len(text) > max_chars:
-            # Try to cut at a sentence boundary (Arabic period or newline)
-            cut_pos = text.rfind(".", 0, max_chars)
-            if cut_pos < max_chars // 2:
-                cut_pos = text.rfind("\n", 0, max_chars)
-            if cut_pos < max_chars // 2:
-                cut_pos = text.rfind(" ", 0, max_chars)
-            if cut_pos > 0:
-                return text[:cut_pos] + "..."
-            return text[:max_chars] + "..."
-        return text
+        return text.strip()
 
     def format_context_for_llm(self, citations: list[Citation]) -> str:
         """Format citations as context block for the LLM prompt.

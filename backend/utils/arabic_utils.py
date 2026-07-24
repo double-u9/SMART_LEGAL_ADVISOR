@@ -55,15 +55,33 @@ def normalize_whitespace(text: str) -> str:
     return text.strip()
 
 
+_TEH_MARBUTA = re.compile(r"\u0629")  # ة -> ه
+
+def normalize_teh(text: str) -> str:
+    """Normalize teh-marbuta (ة) to haa (ه) for search."""
+    return _TEH_MARBUTA.sub("\u0647", text)
+
+def remove_common_prefixes(word: str) -> str:
+    """Remove common Arabic prefixes for better BM25 matching."""
+    if len(word) <= 4:
+        return word
+    
+    prefixes = ["وال", "فال", "بال", "كال", "لل", "ال"]
+    for p in prefixes:
+        if word.startswith(p):
+            return word[len(p):]
+    return word
+
 def normalize_for_search(text: str) -> str:
     """Full normalization pipeline for search & embedding.
 
-    Normalizes alef, yaa, removes tatweel/diacritics, collapses whitespace.
+    Normalizes alef, yaa, teh-marbuta, removes tatweel/diacritics, collapses whitespace.
     This produces a canonical form for matching.
     """
     text = normalize_unicode(text)
     text = normalize_alef(text)
     text = normalize_yaa(text)
+    text = normalize_teh(text)
     text = remove_tatweel(text)
     text = remove_diacritics(text)
     text = normalize_whitespace(text)
@@ -120,18 +138,31 @@ def tokenize_arabic(text: str) -> list[str]:
     """Simple Arabic-aware tokenizer for BM25: split on whitespace & punctuation."""
     text = normalize_for_search(text)
     tokens = re.split(r"[\s\u060C\u061B\u061F.,;:!?()\[\]{}\-/\\\"\']+", text)
-    return [t for t in tokens if t and len(t) > 1]
+    # Remove common prefixes from tokens to improve BM25 recall
+    return [remove_common_prefixes(t) for t in tokens if t and len(t) > 1]
+
+
+# Eastern Arabic (Indic) numeral range: ٠١٢٣٤٥٦٧٨٩
+_EASTERN_ARABIC_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+
+
+def eastern_to_western(text: str) -> str:
+    """Convert Eastern Arabic (Indic) digits to Western Arabic digits."""
+    return text.translate(_EASTERN_ARABIC_DIGITS)
 
 
 def extract_article_number(text: str) -> Optional[str]:
-    """Try to extract an article number from Arabic legal text."""
+    """Try to extract an article number from Arabic legal text.
+    Supports both Western (123) and Eastern Arabic (١٢٣) numerals.
+    """
+    # Normalise Eastern Arabic digits first for uniform matching
+    normalised = eastern_to_western(text)
     patterns = [
-        r"(?:المادة|مادة)\s*[:\-]?\s*(\d+)",
-        r"(?:المادة|مادة)\s*\((\d+)\)",
+        r"(?:المادة|مادة)\s*[:\-\(]?\s*(\d+)",
         r"(?:م|مادة)(\d+)",
     ]
     for pat in patterns:
-        m = re.search(pat, text)
+        m = re.search(pat, normalised)
         if m:
             return m.group(1)
     return None
@@ -140,8 +171,8 @@ def extract_article_number(text: str) -> Optional[str]:
 def extract_chapter(text: str) -> Optional[str]:
     """Try to extract chapter/section from Arabic legal text."""
     patterns = [
-        r"(?:الباب|باب)\s*(?:ال)?(\S+)",
-        r"(?:الفصل|فصل)\s*(?:ال)?(\S+)",
+        r"(?:الباب|باب)\s*(?:ال)?([\S٠-٩]+)",
+        r"(?:الفصل|فصل)\s*(?:ال)?([\S٠-٩]+)",
     ]
     for pat in patterns:
         m = re.search(pat, text)

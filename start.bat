@@ -10,7 +10,7 @@ echo [1/7] Checking Ollama...
 where ollama >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Ollama not found! Install from: https://ollama.com
-    echo After installing, run: ollama pull llama3.1
+    echo After installing, run: ollama pull qwen2.5:1.5b
     pause
     exit /b 1
 )
@@ -18,10 +18,10 @@ echo [OK] Ollama found
 
 REM --- 2. Check/Pull Model ---
 echo [2/7] Checking Ollama model...
-ollama list | findstr /i "llama3.1" >nul 2>&1
+ollama list | findstr /i "qwen2.5:1.5b" >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [INFO] Pulling llama3.1 model, this may take a while...
-    ollama pull llama3.1
+    echo [INFO] Pulling qwen2.5:1.5b model, this may take a while...
+    ollama pull qwen2.5:1.5b
 )
 echo [OK] Model ready
 

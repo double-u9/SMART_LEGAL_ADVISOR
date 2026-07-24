@@ -37,10 +37,10 @@ class Settings(BaseSettings):
     CHUNK_HARD_MAX: int = 1500
 
     # --- Search ---
-    TOP_K_RETRIEVAL: int = 20
-    TOP_K_RERANK: int = 5
-    BM25_WEIGHT: float = 0.3
-    SEMANTIC_WEIGHT: float = 0.7
+    TOP_K_RETRIEVAL: int = 40
+    TOP_K_RERANK: int = 4
+    BM25_WEIGHT: float = 0.7
+    SEMANTIC_WEIGHT: float = 0.3
     RRF_K: int = 60
 
     # --- Server ---

@@ -9,6 +9,9 @@ from backend.utils.logging_config import get_logger
 
 logger = get_logger("cleaner")
 
+# Matches 2+ consecutive Eastern Arabic digits stored in reversed visual order
+_RTL_NUMBER_PATTERN = re.compile(r'[\u0660-\u0669]{2,}')
+
 
 class TextCleaner:
     """Clean extracted text while preserving legal content."""
@@ -18,6 +21,7 @@ class TextCleaner:
     def clean(self, text: str) -> str:
         """Full cleaning pipeline for a single text block."""
         text = normalize_unicode(text)
+        text = self._fix_rtl_numbers(text)
         text = self._remove_page_numbers(text)
         text = self._remove_control_chars(text)
         text = normalize_whitespace(text)
@@ -35,6 +39,7 @@ class TextCleaner:
         for page in pages:
             text = page.get("text", "")
             text = normalize_unicode(text)
+            text = self._fix_rtl_numbers(text)
 
             # Remove repeated header/footer lines
             lines = text.split("\n")
@@ -85,3 +90,14 @@ class TextCleaner:
     def _remove_control_chars(self, text: str) -> str:
         """Remove non-printable control characters (keep Arabic, newlines, spaces)."""
         return re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
+
+    @staticmethod
+    def _fix_rtl_numbers(text: str) -> str:
+        """Fix Eastern Arabic digit sequences stored in reversed visual order.
+
+        In some Arabic PDFs extracted with PyMuPDF, multi-digit Eastern Arabic
+        numbers are stored backwards (e.g. ١٢ instead of ٢١). This function
+        reverses sequences of 2+ consecutive Eastern Arabic digits to restore
+        the correct logical order.
+        """
+        return _RTL_NUMBER_PATTERN.sub(lambda m: m.group(0)[::-1], text)
